@@ -20,9 +20,6 @@ public class PregnantRisk {
 
     private Integer risk;
 
-    @ManyToOne
-    @JoinColumn(name = "pregnant_id", nullable = false)
-    private Pregnant pregnant;
 
 }
 

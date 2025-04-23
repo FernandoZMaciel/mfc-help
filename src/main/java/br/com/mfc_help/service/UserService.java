@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -35,6 +36,10 @@ public class UserService {
                 userPostRequestBody.gender(),
                 null
         ));
+    }
+
+    public User findByIdOrThrowBadRequestException(UUID id) {
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     public User findByUsername(String username) {

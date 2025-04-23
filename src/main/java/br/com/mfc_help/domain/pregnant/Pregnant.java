@@ -2,6 +2,8 @@ package br.com.mfc_help.domain.pregnant;
 
 
 import br.com.mfc_help.domain.Race;
+import br.com.mfc_help.domain.doctor.User;
+import br.com.mfc_help.domain.healthunity.HealthUnity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,7 +22,7 @@ import java.util.UUID;
 public class Pregnant {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     private String name;
@@ -57,5 +59,15 @@ public class Pregnant {
         joinColumns = @JoinColumn(name = "pregnant_id"),
         inverseJoinColumns = @JoinColumn(name = "pregnant_risk_id")
     )
+
     private Set<PregnantRisk> pregnantRisks;
+
+    @ManyToOne
+    @JoinColumn(name = "id_health_unity", referencedColumnName = "id")
+    private HealthUnity healthUnity;
+
+    @ManyToOne
+    @JoinColumn(name = "id_doctor", referencedColumnName = "id")
+    private User user;
 }
+
