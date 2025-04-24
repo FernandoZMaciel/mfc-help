@@ -85,4 +85,13 @@ public class PregnantService {
         pregnant.setPregnantRisks(newRisks);
         return pregnantRepository.save(pregnant);
     }
+
+    public int calculateTotalRisk(UUID pregnantId) {
+        Pregnant pregnant = pregnantRepository.findById(pregnantId)
+            .orElseThrow(() -> new EntityNotFoundException("Pregnant not found"));
+
+        return pregnant.getPregnantRisks().stream()
+            .mapToInt(PregnantRisk::getRisk)
+            .sum();
+    }
 }

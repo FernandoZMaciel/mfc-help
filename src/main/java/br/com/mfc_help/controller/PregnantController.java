@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/pregnant")
@@ -30,6 +31,11 @@ public class PregnantController {
     @PostMapping("anamnesis")
     public ResponseEntity<PregnantResponseBody> post(@RequestBody @Valid PregnantAnamnesisRequestBody pregnantAnamnesisRequestBody) {
         return ResponseEntity.ok(new PregnantResponseBody(pregnantService.doAnamnesis(pregnantAnamnesisRequestBody)));
+    }
+
+    @GetMapping("risk/{id}")
+    public ResponseEntity<Integer> getPregnantTotalRiskById(@PathVariable String id) {
+        return ResponseEntity.ok(pregnantService.calculateTotalRisk(UUID.fromString(id)));
     }
 
 }
