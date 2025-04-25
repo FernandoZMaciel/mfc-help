@@ -1,8 +1,9 @@
 package br.com.mfc_help.service;
 
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.mfc_help.domain.Race;
 import br.com.mfc_help.domain.pregnant.Pregnant;
 import br.com.mfc_help.domain.pregnant.PregnantRisk;
 import br.com.mfc_help.dto.pregnant.PregnantAnamnesisRequestBody;
@@ -90,8 +92,22 @@ public class PregnantService {
         Pregnant pregnant = pregnantRepository.findById(pregnantId)
             .orElseThrow(() -> new EntityNotFoundException("Pregnant not found"));
 
-        return pregnant.getPregnantRisks().stream()
-            .mapToInt(PregnantRisk::getRisk)
-            .sum();
+        int risk = pregnant.getPregnantRisks().stream().mapToInt(PregnantRisk::getRisk).sum();
+
+        long age = getAge(pregnant);
+
+        if (age < 15 || age > 40) {
+            risk += 2;
+        }
+
+        if (pregnant.getRace().equals(Race.NEGRO)) {
+            risk += 1;
+        }
+
+        return risk;
+    }
+
+    private long getAge(Pregnant pregnant) {
+        return ChronoUnit.YEARS.between(pregnant.getBirthDate(), LocalDate.now());
     }
 }
