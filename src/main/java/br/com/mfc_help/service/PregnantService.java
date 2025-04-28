@@ -3,11 +3,14 @@ package br.com.mfc_help.service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import br.com.mfc_help.dto.pregnant.AdviceResponseBody;
 import br.com.mfc_help.dto.pregnant.PregnantPutRequestBody;
 import br.com.mfc_help.dto.pregnant.PregnantStatusResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,5 +186,42 @@ public class PregnantService {
                 .plusDays(280)
                 .minusDays(pregnant.getGestationalAgeInWeeks() * 7L)
                 .minusDays(pregnant.getGestationalAgeInDays());
+    }
+
+    public List<AdviceResponseBody> getAdvices(Pregnant pregnant){
+        long gestationAgeInWeeks = getGestationAgeInWeeks(pregnant);
+        List<AdviceResponseBody> advices = new ArrayList<>();
+        if (gestationAgeInWeeks < 12) {
+            advices.add(new AdviceResponseBody("Ácido fólico até 12 semanas."));
+            advices.add(new AdviceResponseBody("1º USGTV até 12 semanas."));
+        }
+
+        if (gestationAgeInWeeks > 8 && gestationAgeInWeeks < 15) {
+            advices.add(new AdviceResponseBody("USG Morfológico 1º Tri até 14 semanas."));
+        }
+
+        if (gestationAgeInWeeks > 18 && gestationAgeInWeeks < 25) {
+            advices.add(new AdviceResponseBody("USG Morfológico 2º Tri até 24 semanas."));
+        }
+
+        if (gestationAgeInWeeks > 18 && gestationAgeInWeeks < 31) {
+            advices.add(new AdviceResponseBody("USG Obstétrico até 30 semanas."));
+        }
+
+        if (gestationAgeInWeeks > 12) {
+            advices.add(new AdviceResponseBody("2 cps/dia carbonato de cálcio"));
+        }
+
+        return advices;
+    }
+
+    private long getGestationAgeInWeeks(Pregnant pregnant) {
+        LocalDate conceptionDate = pregnant.getFirstUltrasoundDate()
+                .minusDays(pregnant.getGestationalAgeInWeeks() * 7L)
+                .minusDays(pregnant.getGestationalAgeInDays());
+        LocalDate now = LocalDate.now();
+        long totalGestationAgeInDays = ChronoUnit.DAYS.between(conceptionDate, now);
+
+        return  (totalGestationAgeInDays / 7);
     }
 }

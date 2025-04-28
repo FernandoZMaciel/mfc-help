@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -45,6 +46,12 @@ public class PregnantController {
     public ResponseEntity<PregnantStatusResponseBody> getPregnantStatus(@PathVariable String id) {
         Pregnant pregnant = pregnantService.findByIdOrThrowEntityNotFoundException(UUID.fromString(id));
         return ResponseEntity.ok(pregnantService.gerPregnantStatus(pregnant));
+    }
+
+    @GetMapping("advice/{id}")
+    public ResponseEntity<List<AdviceResponseBody>> getPregnantAdvice(@PathVariable String id) {
+        Pregnant pregnant = pregnantService.findByIdOrThrowEntityNotFoundException(UUID.fromString(id));
+        return ResponseEntity.ok(pregnantService.getAdvices(pregnant));
     }
 
 
