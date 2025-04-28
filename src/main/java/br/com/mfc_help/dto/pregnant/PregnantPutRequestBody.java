@@ -1,17 +1,16 @@
 package br.com.mfc_help.dto.pregnant;
 
 import br.com.mfc_help.domain.Race;
+import br.com.mfc_help.domain.pregnant.PregnantRisk;
 import br.com.mfc_help.domain.pregnant.PregnantsBaby;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
+import java.util.Set;
 
-public record PregnantPostRequestBody(
+public record PregnantPutRequestBody(
+        @NotBlank
+        String id,
         @NotBlank(message = "The Name cannot be Blank")
         String name,
         @NotNull(message = "The Birth Date cannot be null")

@@ -13,4 +13,6 @@ import java.util.UUID;
 public interface PregnantRepository extends JpaRepository<Pregnant, UUID> {
 
     boolean existsByCns(String cns);
+
+    boolean existsByCnsAndIdNot(String cns, UUID id);
 }

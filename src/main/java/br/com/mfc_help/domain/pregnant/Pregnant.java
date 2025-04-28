@@ -45,7 +45,13 @@ public class Pregnant {
 
     private Boolean dentalAvaliation;
 
-    private int numberOfPreviousPregnancies;
+    private int vaginalDeliveries;
+
+    private int cesareanSections;
+
+    private int abortions;
+
+    private int fetalDeaths ;
 
     private Race race;
 

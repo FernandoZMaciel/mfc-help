@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import br.com.mfc_help.dto.pregnant.PregnantPutRequestBody;
+import br.com.mfc_help.dto.pregnant.PregnantStatusResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +43,11 @@ public class PregnantService {
     @Autowired
     private UserService userService;
 
+    public Pregnant findByIdOrThrowEntityNotFoundException(UUID id) {
+        return pregnantRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Pregnant not found"));
+    }
+
     @Transactional
     public Pregnant savePregnant(PregnantPostRequestBody pregnantPostRequestBody) {
 
@@ -60,7 +67,10 @@ public class PregnantService {
                 pregnantPostRequestBody.jobPosition(),
                 pregnantPostRequestBody.plannedPregnancy(),
                 pregnantPostRequestBody.dentalAvaliation(),
-                pregnantPostRequestBody.numberOfPreviousPregnancies(),
+                pregnantPostRequestBody.vaginalDeliveries(),
+                pregnantPostRequestBody.cesareanSections(),
+                pregnantPostRequestBody.abortions(),
+                pregnantPostRequestBody.fetalDeaths(),
                 pregnantPostRequestBody.race(),
                 null,
                 null,
@@ -70,6 +80,44 @@ public class PregnantService {
 
         if (pregnantPostRequestBody.baby() != null){
             pregnant.setBaby(pregnantsBabyRepository.save(pregnantPostRequestBody.baby()));
+        }
+
+        return pregnantRepository.save(pregnant);
+    }
+
+    @Transactional
+    public Pregnant updatePregnant(PregnantPutRequestBody pregnantPutRequestBody) {
+        Pregnant savedPregnant = findByIdOrThrowEntityNotFoundException(UUID.fromString(pregnantPutRequestBody.id()));
+        if (pregnantRepository.existsByCnsAndIdNot(pregnantPutRequestBody.cns(), savedPregnant.getId())) {
+            throw new BadRequestException("An Pregnant with that CNS already exists");
+        }
+
+
+        Pregnant pregnant = new Pregnant(
+                UUID.fromString(pregnantPutRequestBody.id()),
+                pregnantPutRequestBody.name(),
+                pregnantPutRequestBody.birthDate(),
+                pregnantPutRequestBody.cns(),
+                pregnantPutRequestBody.lastMenstruationDate(),
+                pregnantPutRequestBody.firstUltrasoundDate(),
+                pregnantPutRequestBody.gestationalAgeInWeeks(),
+                pregnantPutRequestBody.gestationalAgeInDays(),
+                pregnantPutRequestBody.jobPosition(),
+                pregnantPutRequestBody.plannedPregnancy(),
+                pregnantPutRequestBody.dentalAvaliation(),
+                pregnantPutRequestBody.vaginalDeliveries(),
+                pregnantPutRequestBody.cesareanSections(),
+                pregnantPutRequestBody.abortions(),
+                pregnantPutRequestBody.fetalDeaths(),
+                pregnantPutRequestBody.race(),
+                null,
+                savedPregnant.getPregnantRisks(),
+                healthUnityService.getHealthUnity(pregnantPutRequestBody.cnes()),
+                userService.findByIdOrThrowBadRequestException(UUID.fromString(pregnantPutRequestBody.doctor()))
+        );
+
+        if (pregnantPutRequestBody.baby() != null){
+            pregnant.setBaby(pregnantsBabyRepository.save(pregnantPutRequestBody.baby()));
         }
 
         return pregnantRepository.save(pregnant);
@@ -88,10 +136,16 @@ public class PregnantService {
         return pregnantRepository.save(pregnant);
     }
 
-    public int calculateTotalRisk(UUID pregnantId) {
-        Pregnant pregnant = pregnantRepository.findById(pregnantId)
-            .orElseThrow(() -> new EntityNotFoundException("Pregnant not found"));
+    public PregnantStatusResponseBody gerPregnantStatus(Pregnant pregnant) {
+        return new PregnantStatusResponseBody(
+                getAge(pregnant),
+                getGestationAge(pregnant),
+                calculateTotalRisk(pregnant),
+                getPredictedChildbirthDate(pregnant)
+        );
+    }
 
+    private int calculateTotalRisk(Pregnant pregnant) {
         int risk = pregnant.getPregnantRisks().stream().mapToInt(PregnantRisk::getRisk).sum();
 
         long age = getAge(pregnant);
@@ -109,5 +163,25 @@ public class PregnantService {
 
     private long getAge(Pregnant pregnant) {
         return ChronoUnit.YEARS.between(pregnant.getBirthDate(), LocalDate.now());
+    }
+
+    private String getGestationAge(Pregnant pregnant) {
+        LocalDate conceptionDate = pregnant.getFirstUltrasoundDate()
+                .minusDays(pregnant.getGestationalAgeInWeeks() * 7L)
+                .minusDays(pregnant.getGestationalAgeInDays());
+        LocalDate now = LocalDate.now();
+
+        long totalGestationAgeInDays = ChronoUnit.DAYS.between(conceptionDate, now);
+        int gestationAgeInWeeks = (int) (totalGestationAgeInDays / 7);
+        int gestationAgeInDays = (int) (totalGestationAgeInDays % 7);
+
+        return gestationAgeInWeeks + "+" + gestationAgeInDays;
+    }
+
+    private LocalDate getPredictedChildbirthDate(Pregnant pregnant) {
+        return pregnant.getFirstUltrasoundDate()
+                .plusDays(280)
+                .minusDays(pregnant.getGestationalAgeInWeeks() * 7L)
+                .minusDays(pregnant.getGestationalAgeInDays());
     }
 }

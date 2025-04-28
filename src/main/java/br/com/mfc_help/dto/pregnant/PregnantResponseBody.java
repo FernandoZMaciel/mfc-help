@@ -17,7 +17,10 @@ public record PregnantResponseBody(
         String jobPosition,
         Boolean plannedPregnancy,
         Boolean dentalAvaliation,
-        Integer numberOfPreviousPregnancies,
+        Integer vaginalDeliveries,
+        Integer cesareanSections,
+        Integer abortions,
+        Integer fetalDeaths,
         String race,
         Long healthUnityId,
         UUID doctorId
@@ -35,7 +38,10 @@ public record PregnantResponseBody(
                 pregnant.getJobPosition(),
                 pregnant.getPlannedPregnancy(),
                 pregnant.getDentalAvaliation(),
-                pregnant.getNumberOfPreviousPregnancies(),
+                pregnant.getVaginalDeliveries(),
+                pregnant.getCesareanSections(),
+                pregnant.getAbortions(),
+                pregnant.getFetalDeaths(),
                 pregnant.getRace().toString(),
                 pregnant.getHealthUnity() != null ? pregnant.getHealthUnity().getCNES() : null,
                 pregnant.getUser() != null ? pregnant.getUser().getId() : null
